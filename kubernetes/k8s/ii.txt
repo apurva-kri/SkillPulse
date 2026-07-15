@@ -1,0 +1,26 @@
+docker -it installing in host machine or local
+
+myvolume-sql  > it will save or create under docker in one specified folder var/lib/docker/volume/mysqldata/data - it is host machine
+
+myvolume-sql:/var/lib/mysql
+
+docker run -d -v myvolume-sql:/var/lib/mysql mysql:latest   - pod container path
+
+
+k8s:
+
+first create cluster >> 
+1 control plane (container) & 2 workder nodes (2 containers)  
+
+host path: /mnt/data/backend   - host path is my worker node
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:   #info of deployment
+  name: mysql-deployment
+  namespace: skillpulse
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:    #manage all pods who are under mysql label
+    matchLabels:
+      app: mysql
+  template:  #every created pods are look like given label
+    metadata:
+      labels:
+        app: mysql
+    spec:    #application specification
+      containers:
+      - name: mysql
+        image: mysql:8.4
+        ports:
+        - containerPort: 3306
+        env:
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: skillpulse-cm           # The ConfigMap this value comes from.
+                key: MYSQL_DATABASE
+
+          - name: MYSQL_USER
+            valueFrom:
+              configMapKeyRef:
+                name: skillpulse-cm
+                key: MYSQL_USER
+
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:    #this file name should be secretKeyRef not secretsKeyRef
+                name: secret-dockercfg
+                key: MYSQL_ROOT_PASSWORD
+
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-dockercfg
+                key: MYSQL_PASSWORD
+        volumeMounts:
+          - name: mysql-storage
+            mountPath: /var/lib/mysql
+          - name: init
+            mountPath: /docker-entrypoint-initdb.d
+            readOnly: true
+        
+
+        readinessProbe:
+          exec: 
+            command: ["mysqladmin", "ping", "-h", "localhost"]  # mysqladmin is a command-line administration tool that comes with MySQL. It is used to manage and check the status of a MySQL server.
+          initialDelaySeconds: 15
+          periodSeconds: 10
+
+      volumes:
+       - name: mysql-storage
+         persistentVolumeClaim: 
+          claimName: mysql-claim
+       - name: init
+         configMap:
+          name: mysql-init
+      
+      
+
+          
+
+
